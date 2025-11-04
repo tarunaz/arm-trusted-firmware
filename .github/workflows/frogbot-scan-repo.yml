@@ -1,15 +1,15 @@
-name: 🐸 Frogbot – Full Repo Scan (OIDC)
+name: 🐸 Frogbot – Scan Repository
 
 on:
-  workflow_dispatch:             # manual run
+  workflow_dispatch:           # allow manual runs
   schedule:
-    # 08:00 UTC ≈ 00:00 PT — adjust as you like
+    # 08:00 UTC = midnight PT (America/Los_Angeles) – adjust if you like
     - cron: "0 8 * * *"
 
 permissions:
   contents: read
-  id-token: write                # REQUIRED for OIDC
-  security-events: write         # optional: publish results to code scanning
+  id-token: write              # for OIDC (recommended)
+  security-events: write       # lets Frogbot publish code scanning alerts when enabled
 
 jobs:
   scan-repository:
@@ -17,11 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Set up JFrog CLI with OIDC (recommended by JFrog)
+      # (Optional but recommended) configure JFrog CLI with OIDC
       - name: Setup JFrog CLI (OIDC)
         uses: jfrog/setup-jfrog-cli@v4
         with:
-          oidc-provider-name: frogbot-github-oidc   # <-- EXACT provider name from JFrog
+          oidc-provider-name: frogbot-integration
         env:
           JF_URL: ${{ vars.JF_URL }}
 
@@ -29,17 +29,21 @@ jobs:
       - name: Run Frogbot (full repo scan)
         uses: jfrog/frogbot@v2
         with:
-          oidc-provider-name: frogbot-github-oidc
+          oidc-provider-name: frogbot-integration
         env:
-          # JFrog connection (OIDC handles auth)
-          JF_URL: ${{ vars.JF_URL }}
+          # JFrog Platform connection (pick ONE auth method)
+          JF_URL:           ${{ vars.JF_URL }}             # e.g. https://<your>.jfrog.io
+          JF_ACCESS_TOKEN:  ${{ secrets.JF_ACCESS_TOKEN }} # preferred
+          # or:
+          # JF_USER:         ${{ secrets.JF_USER }}
+          # JF_PASSWORD:     ${{ secrets.JF_PASSWORD }}
 
-          # Git token (used by Frogbot to interact with GitHub)
-          JF_GIT_TOKEN: ${{ secrets.JF_GIT_TOKEN }}
+          # Git token - GitHub auto-provides this
+          JF_GIT_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
 
-          # Optional tuning:
-          # JF_PROJECT:        ${{ vars.JF_PROJECT }}
-          # JF_MIN_SEVERITY:   "Medium"     # Low|Medium|High|Critical
-          # JF_FAIL:           "TRUE"       # fail the job on findings
-          # JF_WORKING_DIR:    "."          # scan a subfolder if needed
-          # JF_PATH_EXCLUSIONS: "docs/**,**/*.md"
+          # Optional tweaks
+          # JF_PROJECT:       ${{ vars.JF_PROJECT }}        # use if you scope scans to a JFrog Project
+          # JF_MIN_SEVERITY:  "Medium"                      # Low|Medium|High|Critical
+          # JF_FAIL:          "TRUE"                        # fail the job on findings
+          # JF_WORKING_DIR:   "."                           # change if you scan a subfolder
+          # JF_PATH_EXCLUSIONS: "docs/**,**/*.md"           # comma-separated patterns
