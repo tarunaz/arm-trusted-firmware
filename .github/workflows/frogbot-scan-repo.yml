@@ -17,14 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # (Optional but recommended) configure JFrog CLI with OIDC
-      - name: Setup JFrog CLI (OIDC)
-        uses: jfrog/setup-jfrog-cli@v4
-        with:
-          oidc-provider-name: frogbot-integration
-        env:
-          JF_URL: ${{ vars.JF_URL }}
-
       # Run Frogbot in "scan repository" mode
       - name: Run Frogbot (full repo scan)
         uses: jfrog/frogbot@v2
