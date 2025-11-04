@@ -21,7 +21,7 @@ jobs:
         uses: jfrog/frogbot@v2
         env:
           # JFrog connection (token auth)
-          JF_URL:           ${{ secrets.JF_URL }}            # e.g., https://<your>.jfrog.io
+          JF_URL:           ${{ vars.JF_URL }}            # e.g., https://<your>.jfrog.io
           JF_ACCESS_TOKEN:  ${{ secrets.JF_ACCESS_TOKEN }}   # preferred over user/password
           # or instead of token:
           # JF_USER:        ${{ secrets.JF_USER }}
