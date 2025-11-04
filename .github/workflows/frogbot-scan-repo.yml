@@ -1,15 +1,13 @@
-name: 🐸 Frogbot – Scan Repository
+name: 🐸 Frogbot – Full Repo Scan
 
 on:
-  workflow_dispatch:           # allow manual runs
+  workflow_dispatch:
   schedule:
-    # 08:00 UTC = midnight PT (America/Los_Angeles) – adjust if you like
-    - cron: "0 8 * * *"
+    - cron: "0 8 * * *"   # daily 08:00 UTC (adjust as needed)
 
 permissions:
   contents: read
-  id-token: write              # for OIDC (recommended)
-  security-events: write       # lets Frogbot publish code scanning alerts when enabled
+  security-events: write   # optional: publish to code scanning
 
 jobs:
   scan-repository:
@@ -17,25 +15,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Run Frogbot in "scan repository" mode
+      # No OIDC setup step here
+
       - name: Run Frogbot (full repo scan)
         uses: jfrog/frogbot@v2
-        with:
-          oidc-provider-name: frogbot-integration
         env:
-          # JFrog Platform connection (pick ONE auth method)
-          JF_URL:           ${{ vars.JF_URL }}             # e.g. https://<your>.jfrog.io
-          JF_ACCESS_TOKEN:  ${{ secrets.JF_ACCESS_TOKEN }} # preferred
-          # or:
-          # JF_USER:         ${{ secrets.JF_USER }}
-          # JF_PASSWORD:     ${{ secrets.JF_PASSWORD }}
+          # JFrog connection (token auth)
+          JF_URL:           ${{ secrets.JF_URL }}            # e.g., https://<your>.jfrog.io
+          JF_ACCESS_TOKEN:  ${{ secrets.JF_ACCESS_TOKEN }}   # preferred over user/password
+          # or instead of token:
+          # JF_USER:        ${{ secrets.JF_USER }}
+          # JF_PASSWORD:    ${{ secrets.JF_PASSWORD }}
 
-          # Git token - GitHub auto-provides this
+          # GitHub token (for PR comments / API calls in this repo)
           JF_GIT_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
 
-          # Optional tweaks
-          # JF_PROJECT:       ${{ vars.JF_PROJECT }}        # use if you scope scans to a JFrog Project
-          # JF_MIN_SEVERITY:  "Medium"                      # Low|Medium|High|Critical
-          # JF_FAIL:          "TRUE"                        # fail the job on findings
-          # JF_WORKING_DIR:   "."                           # change if you scan a subfolder
-          # JF_PATH_EXCLUSIONS: "docs/**,**/*.md"           # comma-separated patterns
+          # Optional knobs:
+          # JF_PROJECT:       ${{ secrets.JF_PROJECT }}
+          # JF_MIN_SEVERITY:  "Medium"
+          # JF_FAIL:          "TRUE"
+          # JF_WORKING_DIR:   "."
+          # JF_PATH_EXCLUSIONS: "docs/**,**/*.md"
