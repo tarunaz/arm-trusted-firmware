@@ -44,6 +44,8 @@ jobs:
           JF_PATH_EXCLUSIONS: "tools/cot_dt2c,tools/memory,contrib/libtl/tlc"
           JF_ALLOW_PARTIAL_RESULTS: "true"
 
+          JF_ENABLE_GITHUB_CODE_SCANNING: "true"
+
           # Optional knobs:
           # JF_PROJECT:       ${{ secrets.JF_PROJECT }}
           # JF_MIN_SEVERITY:  "Medium"
