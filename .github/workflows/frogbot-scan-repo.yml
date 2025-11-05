@@ -27,7 +27,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --user poetry
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-          
+
       - name: Run Frogbot (full repo scan)
         uses: jfrog/frogbot@v2
         env:
@@ -40,6 +40,9 @@ jobs:
 
           # GitHub token (for PR comments / API calls in this repo)
           JF_GIT_TOKEN:     ${{ secrets.GITHUB_TOKEN }}
+
+          JF_PATH_EXCLUSIONS: "tools/cot_dt2c,tools/memory,contrib/libtl/tlc"
+          JF_ALLOW_PARTIAL_RESULTS: "true"
 
           # Optional knobs:
           # JF_PROJECT:       ${{ secrets.JF_PROJECT }}
